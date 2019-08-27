@@ -256,11 +256,11 @@ class ClientHandler extends Thread{
                             groups.add(group_name);
                             userpergroup.put(cur_user, groups);
                             dos.writeUTF("Creating the group " + group_name +" and you are the first person in the group");
-                            System.out.println("Creating the group " + group_name +" and " + cur_user + "are the first person in the group");
+                            System.out.println("Creating the group " + group_name +" and " + cur_user + " is the first person in the group");
                         }
                         else{
                             dos.writeUTF("Group " + group_name + " already exists");
-                            System.out.println("Creating the group " + group_name +" and " + cur_user + "are the first person in the group");
+                            System.out.println("Creating the group " + group_name +" and " + cur_user + " is the first person in the group");
                         }
                     }
                     else{
@@ -446,36 +446,51 @@ class ClientHandler extends Thread{
                         else{
                             Vector<String> users = new Vector<String>();
                             users = groupperuser.get(groupname);
+                            boolean flag = false;
                             if(!users.contains(username)){ 
                                 dos.writeUTF("you do not belong to the group to acccess files");
+                                System.out.in("Denied user to access unauthorised file system");
                             }
                             else{
-                                String[] filepar = filepath.split("/");
-                                int l = filepar.length;
-                                String file_name = filepar[l-1];
-                                // dos.writeUTF(file_name);
-                                File filename = new File(file_name);
-                                FileInputStream fileinpstream = new FileInputStream(filename);
-                                BufferedInputStream bis = new BufferedInputStream(fileinpstream);
-                                long size = filename.length(), uploadedsize = 0;
-                                byte[] mybytearray = new byte[(int)size];
-                                dos.writeUTF("download:" + file_name + ":" + String.valueOf(size));
-                                System.out.println("uploading " + file_name + " to client ......");
-                                while(uploadedsize != size){
-                                    long window_size = 1024;
-                                    if(size - uploadedsize >= window_size){
-                                        uploadedsize += window_size;
+                                for(String user: users){
+                                    Vector<String> files = userperfiles.get(user);
+                                    if(files.contains(filepath)){
+                                        flag = true;
                                     }
-                                    else{
-                                        window_size = size - uploadedsize;
-                                        uploadedsize = size;
-                                    }
-                                    mybytearray = new byte[(int)window_size];
-                                    bis.read(mybytearray, 0, (int)window_size); 
-                                    dos.write(mybytearray);
                                 }
-                                System.out.println("File downloaded by " + username);
-                                System.out.println("Server:>>");
+                                if(flag){
+                                    String[] filepar = filepath.split("/");
+                                    int l = filepar.length;
+                                    String file_name = filepar[l-1];
+                                    // dos.writeUTF(file_name);
+                                    File filename = new File(file_name);
+                                    FileInputStream fileinpstream = new FileInputStream(filename);
+                                    BufferedInputStream bis = new BufferedInputStream(fileinpstream);
+                                    long size = filename.length(), uploadedsize = 0;
+                                    byte[] mybytearray = new byte[(int)size];
+                                    dos.writeUTF("download:" + file_name + ":" + String.valueOf(size));
+                                    System.out.println("uploading " + file_name + " to client ......");
+                                    while(uploadedsize != size){
+                                        long window_size = 1024;
+                                        if(size - uploadedsize >= window_size){
+                                            uploadedsize += window_size;
+                                        }
+                                        else{
+                                            window_size = size - uploadedsize;
+                                            uploadedsize = size;
+                                        }
+                                        mybytearray = new byte[(int)window_size];
+                                        bis.read(mybytearray, 0, (int)window_size); 
+                                        dos.write(mybytearray);
+                                    }
+                                    System.out.println("File downloaded by " + username);
+                                    System.out.println("Server:>>");
+                                }
+                                else{
+                                    dos.writeUTF("You are not allowed to access the files outside your sharing system");
+                                    System.out.println("Unauthorised access to filesystem");
+                                    System.out.println("Server:>>");
+                                }
                             }      
                         }
                     }
